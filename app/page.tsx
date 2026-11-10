@@ -45,7 +45,6 @@ export default async function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 w-full">
           <div className="max-w-2xl space-y-6 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-ivory/95 backdrop-blur-md border border-atelier rounded-full text-chocolate text-xs tracking-widest uppercase shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-terracotta animate-pulse" />
               <span>Maroquinerie Végétale • Madagascar</span>
             </div>
 
