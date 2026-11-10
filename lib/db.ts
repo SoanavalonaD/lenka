@@ -10,11 +10,32 @@ let pgPool: Pool | null = null;
 let pgliteInstance: PGlite | null = null;
 let initPromise: Promise<void> | null = null;
 
+// Vérifie si les identifiants Supabase REST sont présents
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+const useSupabaseRest = Boolean(supabaseUrl && supabaseKey);
+
+function getSupabaseHeaders() {
+  return {
+    apikey: supabaseKey!,
+    Authorization: `Bearer ${supabaseKey!}`,
+    "Content-Type": "application/json",
+  };
+}
+
 async function getClient() {
   if (process.env.DATABASE_URL) {
     if (!pgPool) {
+      const isRemote =
+        !process.env.DATABASE_URL.includes("localhost") &&
+        !process.env.DATABASE_URL.includes("127.0.0.1");
+
       pgPool = new Pool({
         connectionString: process.env.DATABASE_URL,
+        ssl: isRemote ? { rejectUnauthorized: false } : undefined,
       });
     }
     return {
@@ -55,6 +76,11 @@ async function getClient() {
 }
 
 export async function initDatabase() {
+  if (useSupabaseRest) {
+    // Avec Supabase REST, le schéma est exécuté dans l'éditeur SQL de Supabase
+    return;
+  }
+
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
@@ -182,6 +208,32 @@ export async function initDatabase() {
 }
 
 export async function getProducts(options?: { category?: string; featured?: boolean }): Promise<Product[]> {
+  if (useSupabaseRest) {
+    try {
+      let endpoint = `${supabaseUrl}/rest/v1/products?select=*&in_stock=eq.true&order=id.asc`;
+      if (options?.category && options.category !== "Tous") {
+        endpoint += `&category=eq.${encodeURIComponent(options.category)}`;
+      }
+      if (options?.featured) {
+        endpoint += `&featured=eq.true`;
+      }
+
+      const res = await fetch(endpoint, {
+        headers: getSupabaseHeaders(),
+        next: { revalidate: 60 },
+      });
+
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          return rows.map(mapProductRow);
+        }
+      }
+    } catch (e) {
+      console.warn("Connexion Supabase REST non disponible, bascule sur les données locales :", e);
+    }
+  }
+
   await initDatabase();
   const db = await getClient();
 
@@ -204,6 +256,24 @@ export async function getProducts(options?: { category?: string; featured?: bool
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
+  if (useSupabaseRest) {
+    try {
+      const endpoint = `${supabaseUrl}/rest/v1/products?select=*&slug=eq.${encodeURIComponent(slug)}&limit=1`;
+      const res = await fetch(endpoint, {
+        headers: getSupabaseHeaders(),
+        next: { revalidate: 60 },
+      });
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          return mapProductRow(rows[0]);
+        }
+      }
+    } catch (e) {
+      console.warn("Connexion Supabase REST non disponible pour slug, bascule locale :", e);
+    }
+  }
+
   await initDatabase();
   const db = await getClient();
   const { rows } = await db.query("SELECT * FROM products WHERE slug = $1 LIMIT 1", [slug]);
@@ -212,6 +282,31 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 }
 
 export async function getShippingZones(): Promise<ShippingZone[]> {
+  if (useSupabaseRest) {
+    try {
+      const endpoint = `${supabaseUrl}/rest/v1/shipping_zones?select=*&order=id.asc`;
+      const res = await fetch(endpoint, {
+        headers: getSupabaseHeaders(),
+        next: { revalidate: 60 },
+      });
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          return rows.map((r: any) => ({
+            id: r.id,
+            code: r.code,
+            name: r.name,
+            fee_mga: Number(r.fee_mga),
+            delivery_estimate: r.delivery_estimate,
+            description: r.description,
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn("Connexion Supabase REST shipping_zones non disponible, bascule locale :", e);
+    }
+  }
+
   await initDatabase();
   const db = await getClient();
   const { rows } = await db.query("SELECT * FROM shipping_zones ORDER BY id ASC");
@@ -226,6 +321,33 @@ export async function getShippingZones(): Promise<ShippingZone[]> {
 }
 
 export async function getCustomerReviews(): Promise<CustomerReview[]> {
+  if (useSupabaseRest) {
+    try {
+      const endpoint = `${supabaseUrl}/rest/v1/customer_reviews?select=*&order=id.asc`;
+      const res = await fetch(endpoint, {
+        headers: getSupabaseHeaders(),
+        next: { revalidate: 60 },
+      });
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          return rows.map((r: any) => ({
+            id: r.id,
+            author_name: r.author_name,
+            location: r.location,
+            product_name: r.product_name,
+            rating: Number(r.rating),
+            comment: r.comment,
+            verified_purchase: Boolean(r.verified_purchase),
+            review_date: r.review_date,
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn("Connexion Supabase REST reviews non disponible, bascule locale :", e);
+    }
+  }
+
   await initDatabase();
   const db = await getClient();
   const { rows } = await db.query("SELECT * FROM customer_reviews ORDER BY id ASC");
@@ -242,9 +364,6 @@ export async function getCustomerReviews(): Promise<CustomerReview[]> {
 }
 
 export async function createOrder(input: CreateOrderInput): Promise<OrderRecord> {
-  await initDatabase();
-  const db = await getClient();
-
   const zones = await getShippingZones();
   const zone = zones.find((z) => z.code === input.deliveryZoneCode) || zones[0];
   const shippingFeeMga = zone.fee_mga;
@@ -255,6 +374,48 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRecord>
   );
   const totalMga = subtotalMga + shippingFeeMga;
   const orderNumber = generateOrderNumber();
+
+  if (useSupabaseRest) {
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/orders`, {
+        method: "POST",
+        headers: {
+          ...getSupabaseHeaders(),
+          Prefer: "return=representation",
+        },
+        body: JSON.stringify({
+          order_number: orderNumber,
+          customer_name: input.customerName,
+          customer_phone: input.customerPhone,
+          customer_email: input.customerEmail || null,
+          delivery_zone_code: input.deliveryZoneCode,
+          delivery_address: input.deliveryAddress,
+          delivery_city: input.deliveryCity,
+          delivery_notes: input.deliveryNotes || null,
+          payment_method: input.paymentMethod,
+          payment_phone: input.paymentPhone || null,
+          payment_reference: input.paymentReference || null,
+          subtotal_mga: subtotalMga,
+          shipping_fee_mga: shippingFeeMga,
+          total_mga: totalMga,
+          items: input.items,
+          status: "confirmée",
+        }),
+      });
+
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          return mapOrderRow(rows[0]);
+        }
+      }
+    } catch (e) {
+      console.warn("Enregistrement commande via Supabase REST échoué, bascule locale :", e);
+    }
+  }
+
+  await initDatabase();
+  const db = await getClient();
 
   const queryText = `
     INSERT INTO orders (
@@ -291,6 +452,24 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRecord>
 }
 
 export async function getOrderByNumber(orderNumber: string): Promise<OrderRecord | null> {
+  if (useSupabaseRest) {
+    try {
+      const endpoint = `${supabaseUrl}/rest/v1/orders?select=*&order_number=eq.${encodeURIComponent(orderNumber)}&limit=1`;
+      const res = await fetch(endpoint, {
+        headers: getSupabaseHeaders(),
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          return mapOrderRow(rows[0]);
+        }
+      }
+    } catch (e) {
+      console.warn("Recherche commande via Supabase REST échouée, bascule locale :", e);
+    }
+  }
+
   await initDatabase();
   const db = await getClient();
   const { rows } = await db.query("SELECT * FROM orders WHERE order_number = $1 LIMIT 1", [orderNumber]);

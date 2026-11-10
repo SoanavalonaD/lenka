@@ -27,100 +27,72 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-24 sm:space-y-32 pb-24">
-      {/* 1. HERO SECTION */}
-      <section className="relative overflow-hidden bg-linen/30 border-b border-atelier">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 lg:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-            
-            {/* Left Hero Content */}
-            <div className="lg:col-span-7 space-y-6 lg:pr-8 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-linen border border-atelier rounded-full text-chocolate text-xs tracking-widest uppercase">
-                
-                <span>Maroquinerie Végétale • Madagascar</span>
-              </div>
+      {/* 1. HERO SECTION AVEC IMAGE DE FOND IMMERSIVE */}
+      <section className="relative overflow-hidden border-b border-atelier min-h-[82vh] lg:min-h-[88vh] flex items-center">
+        {/* Background Image with Warm Theme Filter */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="/images/hero-lenka-bg.jpg"
+            alt="Atelier et créations en raphia naturel Lenkā Madagascar"
+            className="w-full h-full object-cover object-[center_30%] lg:object-[right_center]"
+          />
+          {/* Theme Filters & Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-ivory/95 via-ivory/90 to-ivory/60 lg:to-ivory/20" />
+          <div className="absolute inset-0 bg-linen/25 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ivory via-transparent to-transparent opacity-80 lg:opacity-40" />
+        </div>
 
-              <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl tracking-tight text-charcoal font-medium leading-[1.08]">
-                Une lumière <br />
-                <span className="italic font-normal text-terracotta">à porter.</span>
-              </h1>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 w-full">
+          <div className="max-w-2xl space-y-6 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-ivory/95 backdrop-blur-md border border-atelier rounded-full text-chocolate text-xs tracking-widest uppercase shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-terracotta animate-pulse" />
+              <span>Maroquinerie Végétale • Madagascar</span>
+            </div>
 
-              <p className="text-base sm:text-lg text-chocolate-muted max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
-                Façonnés à la main dans notre atelier d'Antananarivo à partir de raphia naturel pur de la Grande Île. Des accessoires de mode épurés et durables, conçus pour illuminer chaque instant.
-              </p>
+            <h1 className="font-serif text-4xl sm:text-6xl lg:text-7xl tracking-tight text-charcoal font-medium leading-[1.08] drop-shadow-xs">
+              Une lumière <br />
+              <span className="italic font-normal text-terracotta">à porter.</span>
+            </h1>
 
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+            <p className="text-base sm:text-lg text-chocolate/90 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
+              Façonnés à la main dans notre atelier d'Antananarivo à partir de raphia naturel pur de la Grande Île. Des accessoires de mode épurés et durables, conçus pour illuminer chaque instant.
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+              <a
+                href="/boutique"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-chocolate text-ivory px-8 py-4 text-xs uppercase tracking-widest font-medium rounded-sm hover:bg-terracotta transition-all shadow-atelier"
+              >
+                <span>Explorer les Collections</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+
+              {zoeLina && (
                 <a
-                  href="/boutique"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-chocolate text-ivory px-8 py-4 text-xs uppercase tracking-widest font-medium rounded-sm hover:bg-terracotta transition-all shadow-atelier"
+                  href={`/boutique/${zoeLina.slug}`}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-ivory/90 backdrop-blur-md border border-chocolate text-chocolate px-6 py-4 text-xs uppercase tracking-widest font-medium rounded-sm hover:bg-linen transition-colors shadow-sm"
                 >
-                  <span>Explorer les Collections</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Découvrir « Zoe Linā »</span>
                 </a>
-
-                {zoeLina && (
-                  <a
-                    href={`/boutique/${zoeLina.slug}`}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-transparent border border-chocolate text-chocolate px-6 py-4 text-xs uppercase tracking-widest font-medium rounded-sm hover:bg-linen transition-colors"
-                  >
-                    <span>Découvrir « Zoe Linā »</span>
-                  </a>
-                )}
-              </div>
-
-              {/* Key Trust Signals */}
-              <div className="pt-8 border-t border-atelier/60 grid grid-cols-3 gap-4 text-center lg:text-left">
-                <div>
-                  <span className="font-serif text-xl sm:text-2xl font-bold text-chocolate block">100%</span>
-                  <span className="text-[11px] text-chocolate-muted uppercase tracking-wider">Raphia Naturel</span>
-                </div>
-                <div>
-                  <span className="font-serif text-xl sm:text-2xl font-bold text-terracotta block">J+1</span>
-                  <span className="text-[11px] text-chocolate-muted uppercase tracking-wider">Livraison Tana</span>
-                </div>
-                <div>
-                  <span className="font-serif text-xl sm:text-2xl font-bold text-chocolate block">24h à 42h</span>
-                  <span className="text-[11px] text-chocolate-muted uppercase tracking-wider">De crochet main</span>
-                </div>
-              </div>
+              )}
             </div>
 
-            {/* Right Hero Visual */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md lg:max-w-none">
-                {/* Decorative border frame */}
-                <div className="absolute -inset-3 border border-terracotta/30 rounded-sm pointer-events-none transform translate-x-2 translate-y-2 hidden sm:block" />
-                
-                <div className="relative aspect-[3/4] rounded-sm overflow-hidden shadow-2xl border border-atelier bg-linen">
-                  <img
-                    src="/images/products/hero-zoe-lina.jpg"
-                    alt="Cabas en raphia Zoe Linā porté dans la lumière dorée de Madagascar"
-                    className="w-full h-full object-cover object-center"
-                  />
-                  
-                  {/* Floating Atelier Label Tag */}
-                  <div className="absolute bottom-4 left-4 right-4 bg-ivory/95 backdrop-blur-md p-4 rounded-sm border border-atelier shadow-lg flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] uppercase tracking-widest text-terracotta font-semibold block">
-                        Modèle Signature
-                      </span>
-                      <h3 className="font-serif text-base font-bold text-charcoal">
-                        Cabas « Zoe Linā »
-                      </h3>
-                      <p className="text-xs text-chocolate-muted">36 heures de tissage main • Cuir végétal</p>
-                    </div>
-                    <a
-                      href={`/boutique/${zoeLina?.slug || ""}`}
-                      className="p-2.5 rounded-full bg-chocolate text-ivory hover:bg-terracotta transition-colors"
-                      aria-label="Voir le modèle Zoe Linā"
-                    >
-                      <ArrowRight className="w-4 h-4" />
-                    </a>
-                  </div>
-                </div>
+            {/* Key Trust Signals */}
+            <div className="pt-8 border-t border-chocolate/15 grid grid-cols-3 gap-3 sm:gap-4 text-center lg:text-left">
+              <div className="bg-ivory/80 backdrop-blur-sm p-3 rounded-sm border border-atelier/50 shadow-xs">
+                <span className="font-serif text-xl sm:text-2xl font-bold text-chocolate block">100%</span>
+                <span className="text-[11px] text-chocolate-muted uppercase tracking-wider">Raphia Naturel</span>
+              </div>
+              <div className="bg-ivory/80 backdrop-blur-sm p-3 rounded-sm border border-atelier/50 shadow-xs">
+                <span className="font-serif text-xl sm:text-2xl font-bold text-terracotta block">J+1</span>
+                <span className="text-[11px] text-chocolate-muted uppercase tracking-wider">Livraison Tana</span>
+              </div>
+              <div className="bg-ivory/80 backdrop-blur-sm p-3 rounded-sm border border-atelier/50 shadow-xs">
+                <span className="font-serif text-xl sm:text-2xl font-bold text-chocolate block">24h à 42h</span>
+                <span className="text-[11px] text-chocolate-muted uppercase tracking-wider">De crochet main</span>
               </div>
             </div>
-
           </div>
         </div>
       </section>
