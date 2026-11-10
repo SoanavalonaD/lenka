@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --bg-ivory: #FAF7F2;
+  --bg-linen: #F3ECE1;
+  --text-charcoal: #1C1917;
+  --text-chocolate: #382417;
+  --accent-terracotta: #C47256;
+}
+
+body {
+  background-color: var(--bg-ivory);
+  color: var(--text-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #C47256;
+  color: #FFFFFF;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF7F2;
+}
+::-webkit-scrollbar-thumb {
+  background: #D6C7B2;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C47256;
+}
+
+/* Atmospheric subtle woven pattern accent */
+.bg-raffia-pattern {
+  background-color: #FAF7F2;
+  background-image: radial-gradient(#382417 0.4px, transparent 0.4px), radial-gradient(#C47256 0.4px, #FAF7F2 0.4px);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+  background-opacity: 0.03;
+}
+
+.border-atelier {
+  border-color: rgba(56, 36, 23, 0.12);
+}
+
+.border-atelier-light {
+  border-color: rgba(56, 36, 23, 0.06);
+}
+
+.shadow-atelier {
+  box-shadow: 0 10px 30px -10px rgba(56, 36, 23, 0.08);
+}
+

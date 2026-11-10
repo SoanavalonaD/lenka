@@ -1,0 +1,20 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Next.js
+.next
+out
+
+# Local Database
+.data
+
+# Environment
+.env
+.env.local
+.env.production
+
+# System
+.DS_Store
+*.log
+
