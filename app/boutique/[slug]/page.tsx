@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props) {
     openGraph: {
       title: `${product.name} • Lenkā Madagascar`,
       description: product.subtitle,
-      images: [product.images[0]],
+      images: [product.images?.[0] || "/images/hero-lenka-bg.jpg"],
     },
   };
 }

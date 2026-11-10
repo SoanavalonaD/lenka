@@ -2,7 +2,8 @@ export interface ProductColor {
   id: string;
   name: string;
   hex: string;
-  dyeOrigin: string;
+  dyeOrigin?: string;
+  priceDeltaMga?: number;
 }
 
 export interface ProductSize {
@@ -10,6 +11,7 @@ export interface ProductSize {
   label: string;
   dimensions: string;
   priceDeltaMga: number;
+  details?: string;
 }
 
 export interface Product {
@@ -17,7 +19,7 @@ export interface Product {
   slug: string;
   name: string;
   collection: string;
-  category: "Cabas" | "Bandoulières" | "Pochettes" | "Lunch bags";
+  category: string;
   price_mga: number;
   subtitle: string;
   description: string;
@@ -31,6 +33,9 @@ export interface Product {
   sizes: ProductSize[];
   featured: boolean;
   in_stock: boolean;
+  handles?: string;
+  interior?: string;
+  production_delay?: string;
 }
 
 export interface ShippingZone {

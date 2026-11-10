@@ -135,7 +135,7 @@ export default async function HomePage() {
             <div className="lg:col-span-6 grid grid-cols-2 gap-4">
               <div className="space-y-4">
                 <img
-                  src="/images/products/cabas-mahajanga.jpg"
+                  src="/products/lumaya-1.jpg"
                   alt="Détail texture raphia Mahajanga"
                   className="w-full aspect-[4/5] object-cover rounded-sm border border-atelier shadow-sm"
                 />
@@ -150,7 +150,7 @@ export default async function HomePage() {
                   <p className="text-[11px] text-ivory/80">Atelier au cœur d'Antananarivo</p>
                 </div>
                 <img
-                  src="/images/products/bandouliere-nosy.jpg"
+                  src="/products/pochette-pina-3.jpg"
                   alt="Bandoulière Nosy tressage fin"
                   className="w-full aspect-[4/5] object-cover rounded-sm border border-atelier shadow-sm"
                 />
@@ -266,7 +266,7 @@ export default async function HomePage() {
         {/* Large photo banner of atelier */}
         <div className="mt-12 rounded-sm overflow-hidden border border-atelier relative">
           <img
-            src="/images/products/savoir-faire-atelier.jpg"
+            src="/images/frame.jpg"
             alt="Mains d'artisane malgache crochetant le raphia dans l'atelier"
             className="w-full h-80 sm:h-96 object-cover object-center"
           />

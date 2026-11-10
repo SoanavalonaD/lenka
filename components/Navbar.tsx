@@ -86,12 +86,12 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 text-charcoal hover:text-terracotta rounded-full hover:bg-linen/60 transition-colors"
+              className="relative p-2.5 text-charcoal hover:text-terracotta rounded-full hover:bg-linen/60 "
               aria-label={`Panier d'achats avec ${itemCount} articles`}
             >
               <ShoppingBag className="w-5 h-5" />
               {itemCount > 0 && (
-                <span className="absolute top-1 right-1 w-5 h-5 bg-terracotta text-white text-[11px] font-semibold rounded-full flex items-center justify-center animate-pulse">
+                <span className="absolute top-1 right-1 w-5 h-5 bg-terracotta text-white text-[11px] font-semibold rounded-full flex items-center justify-center">
                   {itemCount}
                 </span>
               )}

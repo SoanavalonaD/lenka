@@ -91,7 +91,7 @@ export async function initDatabase() {
         id SERIAL PRIMARY KEY,
         slug VARCHAR(120) UNIQUE NOT NULL,
         name VARCHAR(160) NOT NULL,
-        collection VARCHAR(120) NOT NULL,
+        collection VARCHAR(120) NOT NULL DEFAULT 'Collection Lenkā',
         category VARCHAR(60) NOT NULL,
         price_mga INTEGER NOT NULL,
         subtitle TEXT NOT NULL,
@@ -100,14 +100,21 @@ export async function initDatabase() {
         care_instructions JSONB NOT NULL DEFAULT '[]'::jsonb,
         dimensions VARCHAR(120) NOT NULL,
         weaving_hours INTEGER NOT NULL DEFAULT 24,
-        origin_region VARCHAR(120) NOT NULL DEFAULT 'Analamanga, Madagascar',
+        origin_region VARCHAR(120) NOT NULL DEFAULT 'Antananarivo, Madagascar',
         images JSONB NOT NULL DEFAULT '[]'::jsonb,
         colors JSONB NOT NULL DEFAULT '[]'::jsonb,
         sizes JSONB NOT NULL DEFAULT '[]'::jsonb,
         featured BOOLEAN NOT NULL DEFAULT false,
         in_stock BOOLEAN NOT NULL DEFAULT true,
+        handles TEXT,
+        interior TEXT,
+        production_delay VARCHAR(120),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
+
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS handles TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS interior TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS production_delay VARCHAR(120);
 
       CREATE TABLE IF NOT EXISTS shipping_zones (
         id SERIAL PRIMARY KEY,
@@ -225,7 +232,7 @@ export async function getProducts(options?: { category?: string; featured?: bool
 
       if (res.ok) {
         const rows = await res.json();
-        if (Array.isArray(rows) && rows.length > 0) {
+        if (Array.isArray(rows)) {
           return rows.map(mapProductRow);
         }
       }
@@ -477,26 +484,91 @@ export async function getOrderByNumber(orderNumber: string): Promise<OrderRecord
   return mapOrderRow(rows[0]);
 }
 
+function resolveProductImages(slug: string, rawImages: unknown): string[] {
+  const dbImages: string[] =
+    typeof rawImages === "string"
+      ? JSON.parse(rawImages)
+      : Array.isArray(rawImages)
+        ? rawImages
+        : [];
+
+  const publicDir = path.join(process.cwd(), "public");
+  const extensions = [".jpg", ".jpeg", ".png", ".webp", ".JPG", ".JPEG", ".PNG", ".WEBP"];
+  const candidates = new Set<string>();
+
+  if (slug) {
+    for (const ext of extensions) {
+      candidates.add(`/products/${slug}${ext}`);
+    }
+    for (let i = 1; i <= 4; i++) {
+      for (const ext of extensions) {
+        candidates.add(`/products/${slug}-${i}${ext}`);
+      }
+    }
+  }
+
+  for (const img of dbImages) {
+    if (typeof img === "string" && img.trim()) {
+      const trimmed = img.trim();
+      candidates.add(trimmed);
+      const baseWithoutExt = trimmed.replace(/\.(jpe?g|png|webp)$/i, "");
+      if (baseWithoutExt !== trimmed) {
+        for (const ext of extensions) {
+          candidates.add(`${baseWithoutExt}${ext}`);
+        }
+      }
+    }
+  }
+
+  const existing: string[] = [];
+  const seenBase = new Set<string>();
+
+  for (const relPath of candidates) {
+    if (relPath.startsWith("http://") || relPath.startsWith("https://")) {
+      existing.push(relPath);
+      continue;
+    }
+    const cleanRel = relPath.startsWith("/") ? relPath.slice(1) : relPath;
+    const baseKey = cleanRel.replace(/\.(jpe?g|png|webp)$/i, "").toLowerCase();
+    if (seenBase.has(baseKey)) continue;
+
+    const fullPath = path.join(publicDir, cleanRel);
+    try {
+      if (fs.existsSync(fullPath)) {
+        seenBase.add(baseKey);
+        existing.push(relPath.startsWith("/") ? relPath : `/${relPath}`);
+      }
+    } catch {
+      // ignore fs errors
+    }
+  }
+
+  return existing.slice(0, 4);
+}
+
 function mapProductRow(r: any): Product {
   return {
     id: r.id,
     slug: r.slug,
     name: r.name,
-    collection: r.collection,
+    collection: r.collection || "Collection Lenkā",
     category: r.category,
     price_mga: Number(r.price_mga),
-    subtitle: r.subtitle,
-    description: r.description,
-    material_details: r.material_details,
+    subtitle: r.subtitle || "",
+    description: r.description || "",
+    material_details: r.material_details || "100% Raphia naturel de Madagascar",
     care_instructions: typeof r.care_instructions === "string" ? JSON.parse(r.care_instructions) : r.care_instructions || [],
-    dimensions: r.dimensions,
-    weaving_hours: Number(r.weaving_hours),
-    origin_region: r.origin_region,
-    images: typeof r.images === "string" ? JSON.parse(r.images) : r.images || [],
+    dimensions: r.dimensions || "",
+    weaving_hours: Number(r.weaving_hours || 24),
+    origin_region: r.origin_region || "Antananarivo, Madagascar",
+    images: resolveProductImages(r.slug, r.images),
     colors: typeof r.colors === "string" ? JSON.parse(r.colors) : r.colors || [],
     sizes: typeof r.sizes === "string" ? JSON.parse(r.sizes) : r.sizes || [],
     featured: Boolean(r.featured),
     in_stock: Boolean(r.in_stock),
+    handles: r.handles || undefined,
+    interior: r.interior || undefined,
+    production_delay: r.production_delay || undefined,
   };
 }
 

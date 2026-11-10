@@ -13,8 +13,13 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, showBadge = true }: ProductCardProps) {
   const { addItem } = useCart();
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]?.name || "Naturel");
+  const [selectedColorName, setSelectedColorName] = useState(product.colors[0]?.name || "Naturel");
   const [isAdded, setIsAdded] = useState(false);
+
+  const currentColor = product.colors.find((c) => c.name === selectedColorName);
+  const currentPriceMga = product.price_mga + (currentColor?.priceDeltaMga || 0);
+
+  const mainImage = product.images?.[0] || "/images/hero-lenka-bg.jpg";
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -25,16 +30,18 @@ export default function ProductCard({ product, showBadge = true }: ProductCardPr
       slug: product.slug,
       name: product.name,
       category: product.category,
-      image: product.images[0],
-      selectedColor,
+      image: mainImage,
+      selectedColor: selectedColorName,
       selectedSize: product.sizes[0]?.label || "Standard",
-      unitPriceMga: product.price_mga,
+      unitPriceMga: currentPriceMga,
       quantity: 1,
     });
 
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 1800);
   };
+
+  const origin = product.origin_region ? product.origin_region.split(",")[0] : "Madagascar";
 
   return (
     <div className="group relative flex flex-col bg-ivory rounded-sm border border-atelier hover:border-terracotta/40 transition-all duration-300 hover:shadow-atelier">
@@ -44,16 +51,26 @@ export default function ProductCard({ product, showBadge = true }: ProductCardPr
         className="relative block aspect-[4/5] overflow-hidden bg-linen/50"
       >
         <img
-          src={product.images[0]}
+          src={mainImage}
           alt={product.name}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
           loading="lazy"
+          onError={(e) => {
+            e.currentTarget.src = "/images/hero-lenka-bg.jpg";
+          }}
         />
 
         {/* Featured Tag */}
         {showBadge && product.featured && (
           <span className="absolute top-3 left-3 bg-chocolate/90 backdrop-blur-sm text-ivory text-[10px] uppercase tracking-widest px-2.5 py-1 font-medium rounded-xs">
             Signature
+          </span>
+        )}
+
+        {/* Production delay badge if available */}
+        {product.production_delay && (
+          <span className="absolute top-3 right-3 bg-amber-900/80 backdrop-blur-sm text-ivory text-[10px] tracking-wider px-2 py-0.5 rounded-xs font-medium">
+            Sur commande
           </span>
         )}
 
@@ -77,7 +94,7 @@ export default function ProductCard({ product, showBadge = true }: ProductCardPr
         <div>
           <div className="flex items-center justify-between text-[11px] text-chocolate-muted uppercase tracking-wider">
             <span>{product.category}</span>
-            <span className="text-[10px] text-terracotta font-medium">{product.origin_region.split(",")[0]}</span>
+            <span className="text-[10px] text-terracotta font-medium">{origin}</span>
           </div>
 
           <a href={`/boutique/${product.slug}`}>
@@ -92,29 +109,32 @@ export default function ProductCard({ product, showBadge = true }: ProductCardPr
         </div>
 
         {/* Colors selector pills */}
-        <div className="pt-2 flex items-center gap-1.5">
-          {product.colors.map((color) => (
-            <button
-              key={color.id}
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                setSelectedColor(color.name);
-              }}
-              title={`${color.name} (${color.dyeOrigin})`}
-              className={`w-4 h-4 rounded-full border transition-all ${
-                selectedColor === color.name
-                  ? "ring-2 ring-offset-1 ring-terracotta scale-110"
-                  : "border-black/20 hover:scale-105"
-              }`}
-              style={{ backgroundColor: color.hex }}
-              aria-label={`Choisir teinte ${color.name}`}
-            />
-          ))}
-          <span className="text-[11px] text-chocolate-muted ml-1 font-light truncate">
-            {selectedColor}
-          </span>
-        </div>
+        {product.colors && product.colors.length > 0 && (
+          <div className="pt-2 flex items-center gap-1.5 flex-wrap">
+            {product.colors.map((color) => (
+              <button
+                key={color.id}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedColorName(color.name);
+                }}
+                title={`${color.name}${color.priceDeltaMga ? ` (+${formatMga(color.priceDeltaMga)})` : ""}`}
+                className={`w-4 h-4 rounded-full border transition-all ${
+                  selectedColorName === color.name
+                    ? "ring-2 ring-offset-1 ring-terracotta scale-110"
+                    : "border-black/20 hover:scale-105"
+                }`}
+                style={{ backgroundColor: color.hex }}
+                aria-label={`Choisir teinte ${color.name}`}
+              />
+            ))}
+            <span className="text-[11px] text-chocolate-muted ml-1 font-light truncate max-w-[130px]">
+              {selectedColorName}
+              {currentColor?.priceDeltaMga ? ` (+${formatMga(currentColor.priceDeltaMga)})` : ""}
+            </span>
+          </div>
+        )}
 
         {/* Price and Action */}
         <div className="pt-3 border-t border-atelier-light flex items-center justify-between">
@@ -123,7 +143,7 @@ export default function ProductCard({ product, showBadge = true }: ProductCardPr
               Prix atelier
             </span>
             <span className="font-serif text-base font-bold text-chocolate">
-              {formatMga(product.price_mga)}
+              {formatMga(currentPriceMga)}
             </span>
           </div>
 
@@ -154,4 +174,3 @@ export default function ProductCard({ product, showBadge = true }: ProductCardPr
     </div>
   );
 }
-

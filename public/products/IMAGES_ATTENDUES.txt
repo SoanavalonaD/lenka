@@ -1,0 +1,126 @@
+# Ankarā
+public/products/ankara-1.jpg
+public/products/ankara-2.jpg
+public/products/ankara-3.jpg
+public/products/ankara-4.jpg
+
+# Bandoulière Zanā
+public/products/bandouliere-zana-1.jpg
+public/products/bandouliere-zana-2.jpg
+public/products/bandouliere-zana-3.jpg
+public/products/bandouliere-zana-4.jpg
+
+# Chapeau Sudā
+public/products/chapeau-suda-1.jpg
+public/products/chapeau-suda-2.jpg
+public/products/chapeau-suda-3.jpg
+public/products/chapeau-suda-4.jpg
+
+# Irinā Bay
+public/products/irina-bay-1.jpg
+public/products/irina-bay-2.jpg
+public/products/irina-bay-3.jpg
+public/products/irina-bay-4.jpg
+
+# Lumaya
+public/products/lumaya-1.jpg
+public/products/lumaya-2.jpg
+public/products/lumaya-3.jpg
+public/products/lumaya-4.jpg
+
+# Lunā
+public/products/luna-1.jpg
+public/products/luna-2.jpg
+public/products/luna-3.jpg
+public/products/luna-4.jpg
+
+# Lunch bag
+public/products/lunch-bag-1.jpg
+public/products/lunch-bag-2.jpg
+public/products/lunch-bag-3.jpg
+public/products/lunch-bag-4.jpg
+
+# Manilā
+public/products/manila-1.jpg
+public/products/manila-2.jpg
+public/products/manila-3.jpg
+public/products/manila-4.jpg
+
+# Mary Linā
+public/products/mary-lina-1.jpg
+public/products/mary-lina-2.jpg
+public/products/mary-lina-3.jpg
+public/products/mary-lina-4.jpg
+
+# Mirayā
+public/products/miraya-1.jpg
+public/products/miraya-2.jpg
+public/products/miraya-3.jpg
+public/products/miraya-4.jpg
+
+# Pochette classy
+public/products/pochette-classy-1.jpg
+public/products/pochette-classy-2.jpg
+public/products/pochette-classy-3.jpg
+public/products/pochette-classy-4.jpg
+
+# Pochette pinā
+public/products/pochette-pina-1.jpg
+public/products/pochette-pina-2.jpg
+public/products/pochette-pina-3.jpg
+public/products/pochette-pina-4.jpg
+
+# Pochette à rabat
+public/products/pochette-a-rabat-1.jpg
+public/products/pochette-a-rabat-2.jpg
+public/products/pochette-a-rabat-3.jpg
+public/products/pochette-a-rabat-4.jpg
+
+# Pochette ULA
+public/products/pochette-ula-1.jpg
+public/products/pochette-ula-2.jpg
+public/products/pochette-ula-3.jpg
+public/products/pochette-ula-4.jpg
+
+# Sac à dos Cartā
+public/products/sac-a-dos-carta-1.jpg
+public/products/sac-a-dos-carta-2.jpg
+public/products/sac-a-dos-carta-3.jpg
+public/products/sac-a-dos-carta-4.jpg
+
+# Tressa
+public/products/tressa-1.jpg
+public/products/tressa-2.jpg
+public/products/tressa-3.jpg
+public/products/tressa-4.jpg
+
+# Trousse zanā
+public/products/trousse-zana-1.jpg
+public/products/trousse-zana-2.jpg
+public/products/trousse-zana-3.jpg
+public/products/trousse-zana-4.jpg
+
+# Zarā
+public/products/zara-1.jpg
+public/products/zara-2.jpg
+public/products/zara-3.jpg
+public/products/zara-4.jpg
+
+# Zara Rabat
+public/products/zara-rabat-1.jpg
+public/products/zara-rabat-2.jpg
+public/products/zara-rabat-3.jpg
+public/products/zara-rabat-4.jpg
+
+# Zoe Linā (avec trousse assortie)
+public/products/zoe-lina-avec-trousse-1.jpg
+public/products/zoe-lina-avec-trousse-2.jpg
+public/products/zoe-lina-avec-trousse-3.jpg
+public/products/zoe-lina-avec-trousse-4.jpg
+
+# Zoe Linā
+public/products/zoe-lina-1.jpg
+public/products/zoe-lina-2.jpg
+public/products/zoe-lina-3.jpg
+public/products/zoe-lina-4.jpg
+

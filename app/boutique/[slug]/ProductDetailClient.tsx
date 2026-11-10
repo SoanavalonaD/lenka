@@ -15,8 +15,9 @@ import {
   Check,
   ChevronRight,
   Info,
-  Droplets,
-  RotateCcw,
+  Layers,
+  CalendarClock,
+  Scissors,
 } from "lucide-react";
 
 interface Props {
@@ -26,14 +27,32 @@ interface Props {
 export default function ProductDetailClient({ product }: Props) {
   const { addItem } = useCart();
 
-  const [activeImage, setActiveImage] = useState<string>(product.images[0] || "");
-  const [selectedColor, setSelectedColor] = useState(product.colors[0] || { id: "c1", name: "Naturel", hex: "#E8D8BF", dyeOrigin: "Fibre naturelle" });
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0] || { id: "s1", label: "Taille Unique", dimensions: product.dimensions, priceDeltaMga: 0 });
+  const [brokenImages, setBrokenImages] = useState<string[]>([]);
+
+  const rawImages = (product.images || [])
+    .slice(0, 4)
+    .filter((img) => Boolean(img) && !brokenImages.includes(img));
+
+  const galleryImages = rawImages.length > 0 ? rawImages : ["/images/hero-lenka-bg.jpg"];
+
+  const [selectedImage, setSelectedImage] = useState<string>(galleryImages[0]);
+  const activeImage = galleryImages.includes(selectedImage) ? selectedImage : galleryImages[0];
+
+  const markImageBroken = (imgUrl: string) => {
+    setBrokenImages((prev) => (prev.includes(imgUrl) ? prev : [...prev, imgUrl]));
+  };
+  const [selectedColor, setSelectedColor] = useState(
+    product.colors[0] || { id: "c1", name: "Naturel", hex: "#E8D8BF", dyeOrigin: "Fibre naturelle", priceDeltaMga: 0 }
+  );
+  const [selectedSize, setSelectedSize] = useState(
+    product.sizes[0] || { id: "s1", label: "Taille Unique", dimensions: product.dimensions, priceDeltaMga: 0 }
+  );
   const [quantity, setQuantity] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<"description" | "material" | "care" | "shipping">("description");
   const [isAdded, setIsAdded] = useState(false);
 
-  const currentPriceMga = product.price_mga + (selectedSize.priceDeltaMga || 0);
+  const currentPriceMga =
+    product.price_mga + (selectedSize.priceDeltaMga || 0) + (selectedColor.priceDeltaMga || 0);
 
   const handleAddToCart = () => {
     addItem({
@@ -41,7 +60,7 @@ export default function ProductDetailClient({ product }: Props) {
       slug: product.slug,
       name: product.name,
       category: product.category,
-      image: activeImage || product.images[0],
+      image: activeImage || galleryImages[0],
       selectedColor: selectedColor.name,
       selectedSize: selectedSize.label,
       unitPriceMga: currentPriceMga,
@@ -53,13 +72,13 @@ export default function ProductDetailClient({ product }: Props) {
   };
 
   const whatsappMessage = encodeURIComponent(
-    `Bonjour Lenkā Madagascar ! Je souhaite commander la pièce « ${product.name} » (${product.category}) en teinte ${selectedColor.name}, format ${selectedSize.label} au prix de ${formatMga(currentPriceMga)}. Est-elle disponible pour une livraison à Antananarivo ?`
+    `Bonjour Lenkā Madagascar ! Je souhaite commander la pièce « ${product.name} » (${product.category}) en teinte ${selectedColor.name}, format ${selectedSize.label} au prix de ${formatMga(currentPriceMga)}. Est-elle disponible pour une livraison ?`
   );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
       
-      {/* 1. Left Column: Image Gallery */}
+      {/* 1. Left Column: Image Gallery (Max 4 thumbnails) */}
       <div className="lg:col-span-7 space-y-4">
         {/* Main HD Image Display */}
         <div className="relative aspect-[4/5] rounded-sm overflow-hidden border border-atelier bg-linen/40 shadow-atelier">
@@ -67,11 +86,24 @@ export default function ProductDetailClient({ product }: Props) {
             src={activeImage}
             alt={`${product.name} — ${selectedColor.name}`}
             className="w-full h-full object-cover object-center transition-all duration-300"
+            onError={(e) => {
+              if (activeImage !== "/images/hero-lenka-bg.jpg") {
+                markImageBroken(activeImage);
+              }
+              e.currentTarget.src = "/images/hero-lenka-bg.jpg";
+            }}
           />
 
           <span className="absolute top-4 left-4 bg-chocolate/90 text-ivory text-xs uppercase tracking-widest px-3 py-1 font-medium rounded-xs backdrop-blur-sm">
-            {product.collection}
+            {product.collection || "Lenkā Madagascar"}
           </span>
+
+          {product.production_delay && (
+            <span className="absolute top-4 right-4 bg-amber-900/90 text-ivory text-xs tracking-wider px-3 py-1 font-medium rounded-xs backdrop-blur-sm flex items-center gap-1.5">
+              <CalendarClock className="w-3.5 h-3.5 text-terracotta" />
+              <span>{product.production_delay}</span>
+            </span>
+          )}
 
           <span className="absolute bottom-4 left-4 bg-ivory/95 backdrop-blur-md text-chocolate text-xs tracking-wider px-3 py-1.5 rounded-xs flex items-center gap-1.5 border border-atelier font-medium shadow-sm">
             <Clock className="w-3.5 h-3.5 text-terracotta" />
@@ -79,33 +111,38 @@ export default function ProductDetailClient({ product }: Props) {
           </span>
         </div>
 
-        {/* Thumbnail selector */}
-        {product.images.length > 1 && (
+        {/* Thumbnail selector - affiche uniquement les images réellement disponibles */}
+        {rawImages.length > 1 && (
           <div className="grid grid-cols-4 gap-3">
-            {product.images.map((img, idx) => (
+            {rawImages.map((img, idx) => (
               <button
-                key={idx}
+                key={img}
                 type="button"
-                onClick={() => setActiveImage(img)}
+                onClick={() => setSelectedImage(img)}
                 className={`relative aspect-[4/5] rounded-sm overflow-hidden border transition-all ${
                   activeImage === img
                     ? "ring-2 ring-terracotta border-transparent"
                     : "border-atelier opacity-70 hover:opacity-100"
                 }`}
               >
-                <img src={img} alt="" className="w-full h-full object-cover" />
+                <img
+                  src={img}
+                  alt={`${product.name} vue ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={() => markImageBroken(img)}
+                />
               </button>
             ))}
           </div>
         )}
 
-        {/* Origin Stamp */}
+        {/* Origin & Craftsmanship Stamp */}
         <div className="p-4 bg-linen/30 border border-atelier rounded-sm flex items-center justify-between text-xs text-chocolate-muted">
           <span className="flex items-center gap-1.5">
             <MapPin className="w-4 h-4 text-terracotta" />
-            <span>Provenance des fibres : <strong>{product.origin_region}</strong></span>
+            <span>Provenance des fibres : <strong>{product.origin_region || "Antananarivo, Madagascar"}</strong></span>
           </span>
-          <span className="text-terracotta font-medium">100% Fait Main</span>
+          <span className="text-terracotta font-medium">100% Crochet Main</span>
         </div>
       </div>
 
@@ -134,79 +171,128 @@ export default function ProductDetailClient({ product }: Props) {
             </span>
           </div>
           <span className="text-xs text-emerald-800 font-medium px-2.5 py-1 bg-emerald-50 rounded-full border border-emerald-200">
-            En stock à l'atelier
+            {product.production_delay ? "Sur commande" : "Disponible à l'atelier"}
           </span>
         </div>
 
         {/* Teinte / Couleur Selector */}
-        <div className="space-y-3 pt-2">
-          <div className="flex justify-between items-baseline text-xs">
-            <span className="uppercase tracking-wider text-charcoal font-semibold">
-              Teinte Naturelle :
-            </span>
-            <span className="text-terracotta font-medium">
-              {selectedColor.name} <span className="text-chocolate-muted font-normal">({selectedColor.dyeOrigin})</span>
-            </span>
-          </div>
+        {product.colors && product.colors.length > 0 && (
+          <div className="space-y-3 pt-2">
+            <div className="flex justify-between items-baseline text-xs">
+              <span className="uppercase tracking-wider text-charcoal font-semibold">
+                Couleur / Teinte :
+              </span>
+              <span className="text-terracotta font-medium">
+                {selectedColor.name}{" "}
+                {selectedColor.priceDeltaMga ? (
+                  <span className="text-chocolate font-bold">
+                    (+{formatMga(selectedColor.priceDeltaMga)})
+                  </span>
+                ) : null}
+              </span>
+            </div>
 
-          <div className="flex items-center gap-3">
-            {product.colors.map((color) => (
-              <button
-                key={color.id}
-                type="button"
-                onClick={() => setSelectedColor(color)}
-                className={`flex items-center gap-2 p-1.5 pr-3 rounded-full border text-xs transition-all ${
-                  selectedColor.id === color.id
-                    ? "border-terracotta bg-linen/60 ring-1 ring-terracotta text-charcoal font-medium"
-                    : "border-atelier hover:border-chocolate-muted text-chocolate-muted"
-                }`}
-              >
-                <span
-                  className="w-4 h-4 rounded-full border border-black/20"
-                  style={{ backgroundColor: color.hex }}
-                />
-                <span>{color.name}</span>
-              </button>
-            ))}
+            <div className="flex flex-wrap items-center gap-2">
+              {product.colors.map((color) => (
+                <button
+                  key={color.id}
+                  type="button"
+                  onClick={() => setSelectedColor(color)}
+                  className={`flex items-center gap-2 p-1.5 px-3 rounded-full border text-xs transition-all ${
+                    selectedColor.id === color.id
+                      ? "border-terracotta bg-linen/60 ring-1 ring-terracotta text-charcoal font-medium shadow-xs"
+                      : "border-atelier hover:border-chocolate-muted text-chocolate-muted bg-ivory"
+                  }`}
+                >
+                  <span
+                    className="w-3.5 h-3.5 rounded-full border border-black/20"
+                    style={{ backgroundColor: color.hex }}
+                  />
+                  <span>{color.name}</span>
+                  {color.priceDeltaMga ? (
+                    <span className="text-[10px] text-terracotta font-semibold">
+                      +{formatMga(color.priceDeltaMga)}
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Format / Taille Selector */}
-        <div className="space-y-3 pt-2">
-          <div className="flex justify-between items-baseline text-xs">
-            <span className="uppercase tracking-wider text-charcoal font-semibold">
-              Format & Dimensions :
-            </span>
-            <span className="text-chocolate-muted">
-              {selectedSize.dimensions}
-            </span>
-          </div>
+        {/* Format / Taille Selector (Inclinaisons de taille) */}
+        {product.sizes && product.sizes.length > 0 && (
+          <div className="space-y-3 pt-2">
+            <div className="flex justify-between items-baseline text-xs">
+              <span className="uppercase tracking-wider text-charcoal font-semibold">
+                Taille & Dimensions :
+              </span>
+              <span className="text-chocolate-muted">
+                {selectedSize.dimensions}
+              </span>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {product.sizes.map((size) => (
-              <button
-                key={size.id}
-                type="button"
-                onClick={() => setSelectedSize(size)}
-                className={`p-3 text-left border rounded-sm transition-all text-xs ${
-                  selectedSize.id === size.id
-                    ? "border-terracotta bg-linen/40 ring-1 ring-terracotta"
-                    : "border-atelier hover:border-chocolate-muted"
-                }`}
-              >
-                <div className="flex justify-between items-center font-medium text-charcoal">
-                  <span>{size.label}</span>
-                  {size.priceDeltaMga > 0 && (
-                    <span className="text-terracotta">+{formatMga(size.priceDeltaMga)}</span>
+            <div className="grid grid-cols-1 gap-2.5">
+              {product.sizes.map((size) => (
+                <button
+                  key={size.id}
+                  type="button"
+                  onClick={() => setSelectedSize(size)}
+                  className={`p-3 text-left border rounded-sm transition-all text-xs ${
+                    selectedSize.id === size.id
+                      ? "border-terracotta bg-linen/40 ring-1 ring-terracotta"
+                      : "border-atelier hover:border-chocolate-muted bg-ivory"
+                  }`}
+                >
+                  <div className="flex justify-between items-center font-medium text-charcoal">
+                    <span className="font-semibold">{size.label}</span>
+                    <span className="text-terracotta font-bold">
+                      {formatMga(product.price_mga + size.priceDeltaMga + (selectedColor.priceDeltaMga || 0))}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-chocolate-muted mt-1">
+                    {size.dimensions}
+                  </div>
+                  {size.details && (
+                    <div className="text-[11px] text-chocolate/80 mt-1 italic border-t border-atelier/40 pt-1">
+                      {size.details}
+                    </div>
                   )}
-                </div>
-                <div className="text-[11px] text-chocolate-muted mt-0.5">
-                  {size.dimensions}
-                </div>
-              </button>
-            ))}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Spécificités Atelier (Anses & Intérieur) */}
+        {(product.handles || product.interior || product.production_delay) && (
+          <div className="p-3.5 bg-linen/20 rounded-sm border border-atelier space-y-2 text-xs">
+            {product.handles && (
+              <div className="flex items-start gap-2 text-charcoal">
+                <Scissors className="w-3.5 h-3.5 text-terracotta mt-0.5 flex-shrink-0" />
+                <div>
+                  <strong>Anses :</strong> {product.handles}
+                </div>
+              </div>
+            )}
+            {product.interior && (
+              <div className="flex items-start gap-2 text-charcoal">
+                <Layers className="w-3.5 h-3.5 text-terracotta mt-0.5 flex-shrink-0" />
+                <div>
+                  <strong>Intérieur :</strong> {product.interior}
+                </div>
+              </div>
+            )}
+            {product.production_delay && (
+              <div className="flex items-start gap-2 text-charcoal">
+                <CalendarClock className="w-3.5 h-3.5 text-amber-800 mt-0.5 flex-shrink-0" />
+                <div>
+                  <strong>Délai de confection :</strong> {product.production_delay}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Quantity and Actions */}
         <div className="pt-4 space-y-3">
@@ -274,15 +360,15 @@ export default function ProductDetailClient({ product }: Props) {
         <div className="pt-4 grid grid-cols-2 gap-3 text-xs text-chocolate-muted border-t border-atelier">
           <div className="flex items-center gap-2">
             <Truck className="w-4 h-4 text-terracotta" />
-            <span>Livré demain à Antananarivo</span>
+            <span>Livré le lendemain à Tana (J+1)</span>
           </div>
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-terracotta" />
-            <span>Paiement MVola / Espèces</span>
+            <span>Paiement MVola, Orange Money ou Espèces</span>
           </div>
         </div>
 
-        {/* Accordions / Tabs for Details, Materials, Care & Delivery */}
+        {/* Accordions / Tabs */}
         <div className="pt-6 border-t border-atelier space-y-4">
           <div className="flex border-b border-atelier text-xs">
             <button
@@ -303,7 +389,7 @@ export default function ProductDetailClient({ product }: Props) {
                   : "text-chocolate-muted hover:text-charcoal"
               }`}
             >
-              Matière
+              Matière & Savoir-faire
             </button>
             <button
               onClick={() => setActiveTab("care")}
@@ -323,7 +409,7 @@ export default function ProductDetailClient({ product }: Props) {
                   : "text-chocolate-muted hover:text-charcoal"
               }`}
             >
-              Livraison & Paiement
+              Livraison & CGV
             </button>
           </div>
 
@@ -336,9 +422,9 @@ export default function ProductDetailClient({ product }: Props) {
               <div className="space-y-2">
                 <p>{product.material_details}</p>
                 <div className="p-3 bg-linen/30 rounded border border-atelier/60 space-y-1">
-                  <span className="font-semibold text-charcoal block">Pourquoi le Raphia Malgache ?</span>
+                  <span className="font-semibold text-charcoal block">Raphia Farinifera de Madagascar</span>
                   <p className="text-chocolate-muted text-[11px]">
-                    Le Raphia Farinifera de Madagascar est réputé pour être la fibre de raphia la plus longue, la plus souple et la plus résistante au monde.
+                    Récolté de manière éco-responsable dans les palmeraies malgaches, le raphia offre une souplesse et une résistance incomparables. Chaque brin est crocheté à la main avec passion.
                   </p>
                 </div>
               </div>
@@ -346,7 +432,7 @@ export default function ProductDetailClient({ product }: Props) {
 
             {activeTab === "care" && (
               <ul className="space-y-2">
-                {product.care_instructions.map((tip, idx) => (
+                {(product.care_instructions || []).map((tip, idx) => (
                   <li key={idx} className="flex items-start gap-2">
                     <span className="w-1.5 h-1.5 rounded-full bg-terracotta mt-1.5 flex-shrink-0" />
                     <span>{tip}</span>
@@ -358,16 +444,13 @@ export default function ProductDetailClient({ product }: Props) {
             {activeTab === "shipping" && (
               <div className="space-y-2.5">
                 <p>
-                  <strong>Antananarivo Ville :</strong> 5 000 Ar (Livraison sous 24h à domicile ou bureau).
+                  <strong>Antananarivo :</strong> Livraison le lendemain (J+1) de la validation de commande. Frais de 5 000 Ar à 10 000 Ar selon la zone.
                 </p>
                 <p>
-                  <strong>Grand Tana & Périphérie :</strong> 8 000 Ar (Livraison J+1 ou J+2).
-                </p>
-                <p>
-                  <strong>Provinces :</strong> 18 000 Ar par coopérative sécurisée (Tamatave, Majunga, Diégo, Tuléar, etc. sous 48-72h).
+                  <strong>Provinces :</strong> Frais d'expédition à la charge du client. Paiement exigé 24h avant l'envoi du colis.
                 </p>
                 <p className="text-terracotta pt-1">
-                  Paiements acceptés : Espèces au livreur, MVola, Orange Money.
+                  Paiement à la livraison accepté en Espèces, MVola ou Orange Money. Vérification de l'article recommandée au moment de la livraison.
                 </p>
               </div>
             )}
@@ -379,4 +462,3 @@ export default function ProductDetailClient({ product }: Props) {
     </div>
   );
 }
-

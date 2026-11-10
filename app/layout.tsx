@@ -36,8 +36,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr" className="scroll-smooth">
-      <body className="min-h-screen flex flex-col bg-ivory text-charcoal">
+    <html lang="fr" className="scroll-smooth" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col bg-ivory text-charcoal" suppressHydrationWarning>
         <CartProvider>
           <Navbar />
           <CartDrawer />
