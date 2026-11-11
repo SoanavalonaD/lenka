@@ -10,20 +10,44 @@ let pgPool: Pool | null = null;
 let pgliteInstance: PGlite | null = null;
 let initPromise: Promise<void> | null = null;
 
-// Vérifie si les identifiants Supabase REST sont présents
-const supabaseUrl = process.env.PUBLIC_SUPABASE_URL;
-const supabaseKey =
-  process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Vérifie si les identifiants Supabase REST sont présents (supporte NEXT_PUBLIC_*, PUBLIC_* et SUPABASE_*)
+function getSupabaseConfig() {
+  const rawUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    process.env.PUBLIC_SUPABASE_URL ||
+    process.env.SUPABASE_URL;
+  const url = rawUrl ? rawUrl.trim().replace(/\/+$/, "") : undefined;
 
-const useSupabaseRest = Boolean(supabaseUrl && supabaseKey);
+  const key = (
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    ""
+  ).trim();
 
-function getSupabaseHeaders() {
   return {
-    apikey: supabaseKey!,
-    Authorization: `Bearer ${supabaseKey!}`,
+    url,
+    key: key || undefined,
+    enabled: Boolean(url && key),
+  };
+}
+
+function getSupabaseHeaders(key?: string): Record<string, string> {
+  const activeKey = key || getSupabaseConfig().key || "";
+  const headers: Record<string, string> = {
+    apikey: activeKey,
     "Content-Type": "application/json",
   };
+  // Les clés JWT classiques commencent par "eyJ". Les nouvelles clés "sb_publishable_..."
+  // ne sont pas des JWT et ne doivent pas être passées dans Authorization: Bearer, sinon
+  // PostgREST renvoie 401 (Expected 3 parts in JWT).
+  if (activeKey.startsWith("eyJ")) {
+    headers.Authorization = `Bearer ${activeKey}`;
+  }
+  return headers;
 }
 
 async function getClient() {
@@ -76,7 +100,7 @@ async function getClient() {
 }
 
 export async function initDatabase() {
-  if (useSupabaseRest) {
+  if (getSupabaseConfig().enabled) {
     // Avec Supabase REST, le schéma est exécuté dans l'éditeur SQL de Supabase
     return;
   }
@@ -215,9 +239,10 @@ export async function initDatabase() {
 }
 
 export async function getProducts(options?: { category?: string; featured?: boolean }): Promise<Product[]> {
-  if (useSupabaseRest) {
+  const supa = getSupabaseConfig();
+  if (supa.enabled && supa.url) {
     try {
-      let endpoint = `${supabaseUrl}/rest/v1/products?select=*&in_stock=eq.true&order=id.asc`;
+      let endpoint = `${supa.url}/rest/v1/products?select=*&in_stock=eq.true&order=id.asc`;
       if (options?.category && options.category !== "Tous") {
         endpoint += `&category=eq.${encodeURIComponent(options.category)}`;
       }
@@ -226,8 +251,8 @@ export async function getProducts(options?: { category?: string; featured?: bool
       }
 
       const res = await fetch(endpoint, {
-        headers: getSupabaseHeaders(),
-        next: { revalidate: 60 },
+        headers: getSupabaseHeaders(supa.key),
+        cache: "no-store",
       });
 
       if (res.ok) {
@@ -235,6 +260,9 @@ export async function getProducts(options?: { category?: string; featured?: bool
         if (Array.isArray(rows)) {
           return rows.map(mapProductRow);
         }
+      } else {
+        const errText = await res.text().catch(() => "");
+        console.warn(`Supabase REST getProducts (${res.status}):`, errText);
       }
     } catch (e) {
       console.warn("Connexion Supabase REST non disponible, bascule sur les données locales :", e);
@@ -263,12 +291,13 @@ export async function getProducts(options?: { category?: string; featured?: bool
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  if (useSupabaseRest) {
+  const supa = getSupabaseConfig();
+  if (supa.enabled && supa.url) {
     try {
-      const endpoint = `${supabaseUrl}/rest/v1/products?select=*&slug=eq.${encodeURIComponent(slug)}&limit=1`;
+      const endpoint = `${supa.url}/rest/v1/products?select=*&slug=eq.${encodeURIComponent(slug)}&limit=1`;
       const res = await fetch(endpoint, {
-        headers: getSupabaseHeaders(),
-        next: { revalidate: 60 },
+        headers: getSupabaseHeaders(supa.key),
+        cache: "no-store",
       });
       if (res.ok) {
         const rows = await res.json();
@@ -289,12 +318,13 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 }
 
 export async function getShippingZones(): Promise<ShippingZone[]> {
-  if (useSupabaseRest) {
+  const supa = getSupabaseConfig();
+  if (supa.enabled && supa.url) {
     try {
-      const endpoint = `${supabaseUrl}/rest/v1/shipping_zones?select=*&order=id.asc`;
+      const endpoint = `${supa.url}/rest/v1/shipping_zones?select=*&order=id.asc`;
       const res = await fetch(endpoint, {
-        headers: getSupabaseHeaders(),
-        next: { revalidate: 60 },
+        headers: getSupabaseHeaders(supa.key),
+        cache: "no-store",
       });
       if (res.ok) {
         const rows = await res.json();
@@ -328,12 +358,13 @@ export async function getShippingZones(): Promise<ShippingZone[]> {
 }
 
 export async function getCustomerReviews(): Promise<CustomerReview[]> {
-  if (useSupabaseRest) {
+  const supa = getSupabaseConfig();
+  if (supa.enabled && supa.url) {
     try {
-      const endpoint = `${supabaseUrl}/rest/v1/customer_reviews?select=*&order=id.asc`;
+      const endpoint = `${supa.url}/rest/v1/customer_reviews?select=*&order=id.asc`;
       const res = await fetch(endpoint, {
-        headers: getSupabaseHeaders(),
-        next: { revalidate: 60 },
+        headers: getSupabaseHeaders(supa.key),
+        cache: "no-store",
       });
       if (res.ok) {
         const rows = await res.json();
@@ -382,12 +413,13 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRecord>
   const totalMga = subtotalMga + shippingFeeMga;
   const orderNumber = generateOrderNumber();
 
-  if (useSupabaseRest) {
+  const supa = getSupabaseConfig();
+  if (supa.enabled && supa.url) {
     try {
-      const res = await fetch(`${supabaseUrl}/rest/v1/orders`, {
+      const res = await fetch(`${supa.url}/rest/v1/orders`, {
         method: "POST",
         headers: {
-          ...getSupabaseHeaders(),
+          ...getSupabaseHeaders(supa.key),
           Prefer: "return=representation",
         },
         body: JSON.stringify({
@@ -459,11 +491,12 @@ export async function createOrder(input: CreateOrderInput): Promise<OrderRecord>
 }
 
 export async function getOrderByNumber(orderNumber: string): Promise<OrderRecord | null> {
-  if (useSupabaseRest) {
+  const supa = getSupabaseConfig();
+  if (supa.enabled && supa.url) {
     try {
-      const endpoint = `${supabaseUrl}/rest/v1/orders?select=*&order_number=eq.${encodeURIComponent(orderNumber)}&limit=1`;
+      const endpoint = `${supa.url}/rest/v1/orders?select=*&order_number=eq.${encodeURIComponent(orderNumber)}&limit=1`;
       const res = await fetch(endpoint, {
-        headers: getSupabaseHeaders(),
+        headers: getSupabaseHeaders(supa.key),
         cache: "no-store",
       });
       if (res.ok) {
@@ -484,6 +517,64 @@ export async function getOrderByNumber(orderNumber: string): Promise<OrderRecord
   return mapOrderRow(rows[0]);
 }
 
+const KNOWN_PUBLIC_PRODUCT_IMAGES = new Set([
+  "/products/ankara-1.jpg",
+  "/products/ankara-2.jpg",
+  "/products/ankara-3.jpg",
+  "/products/ankara-4.jpg",
+  "/products/bandouliere-zana-1.png",
+  "/products/chapeau-suda-1.jpg",
+  "/products/chapeau-suda-2.jpg",
+  "/products/chapeau-suda-3.jpg",
+  "/products/irina-bay-1.jpg",
+  "/products/irina-bay-2.jpg",
+  "/products/irina-bay-3.jpg",
+  "/products/irina-bay-4.jpg",
+  "/products/lumaya-1.jpg",
+  "/products/lumaya-2.jpg",
+  "/products/lumaya-3.jpg",
+  "/products/lumaya-4.jpg",
+  "/products/luna-1.jpg",
+  "/products/lunch-bag-1.jpg",
+  "/products/lunch-bag-2.jpg",
+  "/products/lunch-bag-3.jpg",
+  "/products/lunch-bag-4.jpg",
+  "/products/manila-1.png",
+  "/products/mary-lina-1.jpg",
+  "/products/mary-lina-2.jpg",
+  "/products/mary-lina-3.jpg",
+  "/products/mary-lina-4.jpg",
+  "/products/miraya-1.jpg",
+  "/products/miraya-2.jpg",
+  "/products/pochette-a-rabat-1.png",
+  "/products/pochette-classy-1.jpg",
+  "/products/pochette-classy-2.jpg",
+  "/products/pochette-classy-3.jpg",
+  "/products/pochette-classy-4.jpg",
+  "/products/pochette-pina-1.jpg",
+  "/products/pochette-pina-2.jpg",
+  "/products/pochette-pina-3.jpg",
+  "/products/pochette-pina-4.jpg",
+  "/products/pochette-ula-1.png",
+  "/products/sac-a-dos-carta-1.jpg",
+  "/products/sac-a-dos-carta-2.jpg",
+  "/products/sac-a-dos-carta-3.jpg",
+  "/products/sac-a-dos-carta-4.jpg",
+  "/products/tressa-1.jpg",
+  "/products/trousse-zana-1.png",
+  "/products/zara-1.jpg",
+  "/products/zara-2.jpg",
+  "/products/zara-3.jpg",
+  "/products/zara-rabat-1.png",
+  "/products/zoe-lina-1.jpg",
+  "/products/zoe-lina-2.jpg",
+  "/products/zoe-lina-3.jpg",
+  "/products/zoe-lina-4.jpg",
+  "/products/zoe-lina-avec-trousse-1.jpg",
+  "/products/zoe-lina-avec-trousse-2.jpg",
+  "/products/zoe-lina-avec-trousse-3.jpg",
+]);
+
 function resolveProductImages(slug: string, rawImages: unknown): string[] {
   const dbImages: string[] =
     typeof rawImages === "string"
@@ -493,6 +584,14 @@ function resolveProductImages(slug: string, rawImages: unknown): string[] {
         : [];
 
   const publicDir = path.join(process.cwd(), "public");
+  const hasLocalProductsDir = (() => {
+    try {
+      return fs.existsSync(path.join(publicDir, "products"));
+    } catch {
+      return false;
+    }
+  })();
+
   const extensions = [".jpg", ".jpeg", ".png", ".webp", ".JPG", ".JPEG", ".PNG", ".WEBP"];
   const candidates = new Set<string>();
 
@@ -528,18 +627,25 @@ function resolveProductImages(slug: string, rawImages: unknown): string[] {
       existing.push(relPath);
       continue;
     }
-    const cleanRel = relPath.startsWith("/") ? relPath.slice(1) : relPath;
+    const normalizedRel = relPath.startsWith("/") ? relPath : `/${relPath}`;
+    const cleanRel = normalizedRel.slice(1);
     const baseKey = cleanRel.replace(/\.(jpe?g|png|webp)$/i, "").toLowerCase();
     if (seenBase.has(baseKey)) continue;
 
-    const fullPath = path.join(publicDir, cleanRel);
-    try {
-      if (fs.existsSync(fullPath)) {
-        seenBase.add(baseKey);
-        existing.push(relPath.startsWith("/") ? relPath : `/${relPath}`);
+    let exists = false;
+    if (hasLocalProductsDir) {
+      try {
+        exists = fs.existsSync(path.join(publicDir, cleanRel));
+      } catch {
+        exists = false;
       }
-    } catch {
-      // ignore fs errors
+    } else {
+      exists = KNOWN_PUBLIC_PRODUCT_IMAGES.has(normalizedRel);
+    }
+
+    if (exists) {
+      seenBase.add(baseKey);
+      existing.push(normalizedRel);
     }
   }
 

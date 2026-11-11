@@ -8,7 +8,7 @@ export const metadata = {
     "Explorez notre collection complète de maroquinerie artisanale en raphia naturel de Madagascar : Cabas 'Zoe Linā', sacs bandoulières, pochettes et lunch bags tressés main. Prix affichés en Ariary (MGA).",
 };
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function BoutiquePage() {
   const products = await getProducts();
