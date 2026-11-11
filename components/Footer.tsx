@@ -8,8 +8,8 @@ export default function Footer() {
       {/* 4 Pillars Bar */}
       <div className="border-b border-ivory/10 bg-chocolate-light/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="flex items-start gap-3.5">
-            <div className="p-2.5 rounded-full bg-ivory/10 text-terracotta flex-shrink-0">
+          <div className="space-y-3"> 
+            <div className="p-2.5 w-12 h-12 rounded-full bg-ivory/10 text-terracotta flex-shrink-0 flex items-center justify-center">
               <Image
                 src="/logos/leaf.png"
                 alt="Description de l'icône"
@@ -26,8 +26,8 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="flex items-start gap-3.5">
-            <div className="p-2.5 rounded-full bg-ivory/10 text-terracotta flex-shrink-0">
+          <div className="space-y-3 gap-3.5">
+            <div className="p-2.5 w-12 h-12 rounded-full bg-ivory/10 text-terracotta flex-shrink-0 flex items-center justify-center">
               <Image
                 src="/logos/handshake.png"
                 alt="Description de l'icône"
@@ -44,8 +44,8 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="flex items-start gap-3.5">
-            <div className="p-2.5 rounded-full bg-ivory/10 text-terracotta flex-shrink-0">
+          <div className="space-y-3">
+            <div className="p-2.5 w-12 h-12 rounded-full bg-ivory/10 text-terracotta flex-shrink-0 flex items-center justify-center">
               <Image
                 src="/logos/bus.png"
                 alt="Description de l'icône"
@@ -62,8 +62,8 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="flex items-start gap-3.5">
-            <div className="p-2.5 rounded-full bg-ivory/10 text-terracotta flex-shrink-0">
+          <div className="space-y-3">
+            <div className="p-2.5 w-12 h-12 rounded-full bg-ivory/10 text-terracotta flex-shrink-0 flex items-center justify-center">
               <Image
                 src="/logos/checked.png"
                 alt="Description de l'icône"

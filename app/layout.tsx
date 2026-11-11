@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import { CartProvider } from "@/lib/cart-context";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://lenka-madagascar.com"),
@@ -42,6 +43,7 @@ export default function RootLayout({
           <Navbar />
           <CartDrawer />
           <main className="flex-1">{children}</main>
+          <ScrollReveal />
           <Footer />
         </CartProvider>
       </body>
