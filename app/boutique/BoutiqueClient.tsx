@@ -23,14 +23,30 @@ export default function BoutiqueClient({ initialProducts }: BoutiqueClientProps)
   const catParam = searchParams.get("cat");
   const qParam = searchParams.get("q");
 
+  const [products, setProducts] = useState<Product[]>(initialProducts);
   const [activeCategory, setActiveCategory] = useState<string>("Tous");
   const [sortBy, setSortBy] = useState<string>("featured");
   const [searchQuery, setSearchQuery] = useState<string>(qParam || "");
 
-  const categories = useMemo(() => {
-    const set = new Set(initialProducts.map((p) => p.category).filter(Boolean));
-    return ["Tous", ...Array.from(set)];
+  useEffect(() => {
+    if (initialProducts.length > 0) {
+      setProducts(initialProducts);
+    } else {
+      fetch("/api/products")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && Array.isArray(data.products) && data.products.length > 0) {
+            setProducts(data.products);
+          }
+        })
+        .catch(() => {});
+    }
   }, [initialProducts]);
+
+  const categories = useMemo(() => {
+    const set = new Set(products.map((p) => p.category).filter(Boolean));
+    return ["Tous", ...Array.from(set)];
+  }, [products]);
 
   useEffect(() => {
     if (catParam) {
@@ -50,7 +66,7 @@ export default function BoutiqueClient({ initialProducts }: BoutiqueClientProps)
   }, [qParam]);
 
   const filteredAndSortedProducts = useMemo(() => {
-    let result = [...initialProducts];
+    let result = [...products];
 
     if (activeCategory !== "Tous") {
       result = result.filter((p) => p.category === activeCategory);
@@ -86,7 +102,7 @@ export default function BoutiqueClient({ initialProducts }: BoutiqueClientProps)
     }
 
     return result;
-  }, [initialProducts, activeCategory, sortBy, searchQuery]);
+  }, [products, activeCategory, sortBy, searchQuery]);
 
   // Pagination : 6 produits par page
   const PAGE_SIZE = 6;
@@ -110,7 +126,7 @@ export default function BoutiqueClient({ initialProducts }: BoutiqueClientProps)
     }
   };
 
-  if (initialProducts.length === 0) {
+  if (products.length === 0) {
     return (
       <div className="py-20 text-center space-y-4 bg-linen/20 rounded-sm border border-atelier p-8">
         <PackageOpen className="w-12 h-12 text-terracotta mx-auto stroke-1" />
@@ -166,8 +182,8 @@ export default function BoutiqueClient({ initialProducts }: BoutiqueClientProps)
             const isSelected = activeCategory === category;
             const count =
               category === "Tous"
-                ? initialProducts.length
-                : initialProducts.filter((p) => p.category === category).length;
+                ? products.length
+                : products.filter((p) => p.category === category).length;
 
             return (
               <button

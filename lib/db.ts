@@ -10,12 +10,16 @@ let pgPool: Pool | null = null;
 let pgliteInstance: PGlite | null = null;
 let initPromise: Promise<void> | null = null;
 
+const DEFAULT_SUPABASE_URL = "https://doaqkwotawivzwcnwdgx.supabase.co";
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_OBEcb6FbxCj9qSKLSys9Nw_2vCYbpQC";
+
 // Vérifie si les identifiants Supabase REST sont présents (supporte NEXT_PUBLIC_*, PUBLIC_* et SUPABASE_*)
 function getSupabaseConfig() {
   const rawUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ||
     process.env.PUBLIC_SUPABASE_URL ||
-    process.env.SUPABASE_URL;
+    process.env.SUPABASE_URL ||
+    DEFAULT_SUPABASE_URL;
   const url = rawUrl ? rawUrl.trim().replace(/\/+$/, "") : undefined;
 
   const key = (
@@ -25,7 +29,7 @@ function getSupabaseConfig() {
     process.env.PUBLIC_SUPABASE_ANON_KEY ||
     process.env.SUPABASE_PUBLISHABLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
-    ""
+    DEFAULT_SUPABASE_PUBLISHABLE_KEY
   ).trim();
 
   return {
@@ -184,14 +188,27 @@ export async function initDatabase() {
 
     await db.exec(schemaSql);
 
+    await db.exec(`
+      DELETE FROM products WHERE slug IN (
+        'zoe-lina-cabas-iconique', 'cabas-mahajanga-chevron', 'bandouliere-nosy-epuree',
+        'pochette-tsingy-ajouree', 'lunchbag-ambanja-artisanal', 'cabas-sainte-marie-panier'
+      );
+    `);
+
     for (const p of INITIAL_PRODUCTS) {
       await db.query(
         `INSERT INTO products (
           slug, name, collection, category, price_mga, subtitle, description,
           material_details, care_instructions, dimensions, weaving_hours, origin_region,
-          images, colors, sizes, featured, in_stock
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
-        ON CONFLICT (slug) DO NOTHING`,
+          images, colors, sizes, featured, in_stock, handles, interior, production_delay
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+        ON CONFLICT (slug) DO UPDATE SET
+          images = EXCLUDED.images,
+          colors = EXCLUDED.colors,
+          sizes = EXCLUDED.sizes,
+          handles = EXCLUDED.handles,
+          interior = EXCLUDED.interior,
+          production_delay = EXCLUDED.production_delay`,
         [
           p.slug,
           p.name,
@@ -210,6 +227,9 @@ export async function initDatabase() {
           JSON.stringify(p.sizes),
           p.featured,
           p.in_stock,
+          p.handles || null,
+          p.interior || null,
+          p.production_delay || null,
         ]
       );
     }
