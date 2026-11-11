@@ -140,7 +140,7 @@ export default async function HomePage() {
                   className="w-full aspect-[4/5] object-cover rounded-sm border border-atelier shadow-sm"
                 />
                 <div className="p-4 bg-ivory rounded-sm border border-atelier text-center space-y-1">
-                  <span className="font-serif text-2xl font-bold text-chocolate">0 plastique</span>
+                  <span className="font-serif text-2xl font-bold text-chocolate">Zéro plastique</span>
                   <p className="text-[11px] text-chocolate-muted">Fibres 100% végétales biodégradables</p>
                 </div>
               </div>
