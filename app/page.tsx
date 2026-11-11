@@ -353,7 +353,7 @@ export default async function HomePage() {
 
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <a
-              href="https://wa.me/261340000000?text=Bonjour%20Lenkā%20Madagascar,%20j'aimerais%20commander%20un%20sac"
+              href="https://wa.me/2613344436172?text=Bonjour%20Lenkā%20Madagascar,%20j'aimerais%20commander%20un%20sac"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2.5 bg-emerald-600 text-white px-7 py-4 text-xs uppercase tracking-widest font-semibold rounded-sm hover:bg-emerald-500 transition-colors shadow-md"

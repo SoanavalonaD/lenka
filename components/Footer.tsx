@@ -106,7 +106,7 @@ export default function Footer() {
             {/* Socials & WhatsApp */}
             <div className="flex items-center gap-3 pt-2">
               <a
-                href="https://wa.me/261340000000"
+                href="https://wa.me/261344436172"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-ivory/10 hover:bg-emerald-600 text-ivory transition-colors"
@@ -115,7 +115,7 @@ export default function Footer() {
                 <MessageCircle className="w-4 h-4" />
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/lenkamadagascar"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-ivory/10 hover:bg-pink-600 text-ivory transition-colors"
@@ -127,7 +127,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="https://facebook.com"
+                href="https://web.facebook.com/lenkaraffiabags"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-2 rounded-full bg-ivory/10 hover:bg-blue-600 text-ivory transition-colors"
@@ -221,11 +221,11 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-terracotta flex-shrink-0" />
-                <span>+261 34 00 000 00 / 032 00 000 00</span>
+                <span>+261 34 44 361 72</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-terracotta flex-shrink-0" />
-                <span>contact@lenka-madagascar.com</span>
+                <span>lenka.mdg@gmail.com</span>
               </li>
             </ul>
 

@@ -143,7 +143,7 @@ export default function AProposPage() {
                 <Phone className="w-4 h-4 text-terracotta flex-shrink-0" />
                 <div>
                   <strong className="block">Téléphone / Accueil</strong>
-                  <span className="text-chocolate-muted">+261 34 00 000 00 / 032 00 000 00</span>
+                  <span className="text-chocolate-muted"> +261 34 44 361 72 </span>
                 </div>
               </div>
 
@@ -151,14 +151,14 @@ export default function AProposPage() {
                 <Mail className="w-4 h-4 text-terracotta flex-shrink-0" />
                 <div>
                   <strong className="block">Courriel</strong>
-                  <span className="text-chocolate-muted">contact@lenka-madagascar.com</span>
+                  <span className="text-chocolate-muted">lenka.mdg@gmail.com</span>
                 </div>
               </div>
             </div>
 
             {/* WhatsApp Direct Action Button */}
             <a
-              href="https://wa.me/261340000000?text=Bonjour%20Lenkā%20Madagascar,%20je%20souhaite%20prendre%20contact"
+              href="https://wa.me/261344436172?text=Bonjour%20Lenkā%20Madagascar,%20je%20souhaite%20prendre%20contact"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full flex items-center justify-center gap-3 bg-emerald-600 text-white py-4 px-6 text-xs uppercase tracking-widest font-semibold rounded-sm hover:bg-emerald-500 transition-colors shadow-sm"
@@ -252,7 +252,7 @@ export default function AProposPage() {
                     required
                     value={formData.phoneOrEmail}
                     onChange={(e) => setFormData({ ...formData, phoneOrEmail: e.target.value })}
-                    placeholder="034 00 000 00 ou contact@exemple.mg"
+                    placeholder="034 44 361 72 ou contact@exemple.mg"
                     className="w-full bg-linen/20 border border-atelier rounded-sm px-3.5 py-2.5 text-xs text-charcoal focus:outline-none focus:border-terracotta"
                   />
                 </div>

@@ -346,7 +346,7 @@ export default function ProductDetailClient({ product }: Props) {
 
           {/* Direct WhatsApp Ordering */}
           <a
-            href={`https://wa.me/261340000000?text=${whatsappMessage}`}
+            href={`https://wa.me/261344436172?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full h-12 flex items-center justify-center gap-2.5 bg-emerald-700 text-white text-xs uppercase tracking-widest font-medium rounded-sm hover:bg-emerald-600 transition-colors shadow-sm"
