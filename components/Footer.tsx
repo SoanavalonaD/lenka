@@ -1,4 +1,5 @@
 import React from "react";
+import Image from 'next/image'
 import { MessageCircle, Phone, MapPin, Mail, ShieldCheck, Truck, Sparkles, HeartHandshake } from "lucide-react";
 
 export default function Footer() {
@@ -9,7 +10,13 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="flex items-start gap-3.5">
             <div className="p-2.5 rounded-full bg-ivory/10 text-terracotta flex-shrink-0">
-              <Sparkles className="w-5 h-5" />
+              <Image
+                src="/logos/leaf.png"
+                alt="Description de l'icône"
+                width={30}
+                height={30}
+                className="invert"
+              />
             </div>
             <div>
               <h4 className="font-serif text-sm text-ivory font-medium">100% Raphia Naturel</h4>
@@ -21,7 +28,13 @@ export default function Footer() {
 
           <div className="flex items-start gap-3.5">
             <div className="p-2.5 rounded-full bg-ivory/10 text-terracotta flex-shrink-0">
-              <HeartHandshake className="w-5 h-5" />
+              <Image
+                src="/logos/handshake.png"
+                alt="Description de l'icône"
+                width={30}
+                height={30}
+                className="invert"
+              />
             </div>
             <div>
               <h4 className="font-serif text-sm text-ivory font-medium">Artisanat Éthique</h4>
@@ -33,7 +46,13 @@ export default function Footer() {
 
           <div className="flex items-start gap-3.5">
             <div className="p-2.5 rounded-full bg-ivory/10 text-terracotta flex-shrink-0">
-              <Truck className="w-5 h-5" />
+              <Image
+                src="/logos/bus.png"
+                alt="Description de l'icône"
+                width={30}
+                height={30}
+                className="invert"
+              />
             </div>
             <div>
               <h4 className="font-serif text-sm text-ivory font-medium">Livraison J+1 à Tana</h4>
@@ -45,7 +64,13 @@ export default function Footer() {
 
           <div className="flex items-start gap-3.5">
             <div className="p-2.5 rounded-full bg-ivory/10 text-terracotta flex-shrink-0">
-              <ShieldCheck className="w-5 h-5" />
+              <Image
+                src="/logos/checked.png"
+                alt="Description de l'icône"
+                width={30}
+                height={30}
+                className="invert"
+              />
             </div>
             <div>
               <h4 className="font-serif text-sm text-ivory font-medium">Paiements Locaux Sûrs</h4>
