@@ -8,7 +8,7 @@ export const metadata = {
     "Finalisez votre commande de sacs en raphia naturel Lenkā. Livraison le lendemain à Antananarivo, expédition en province, paiement par MVola, Orange Money ou espèces à la livraison.",
 };
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function PanierPage() {
   const shippingZones = await getShippingZones();

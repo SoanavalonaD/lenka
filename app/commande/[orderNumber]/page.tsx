@@ -14,6 +14,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 interface Props {
   params: Promise<{ orderNumber: string }>;
 }

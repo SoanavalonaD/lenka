@@ -104,11 +104,6 @@ async function getClient() {
 }
 
 export async function initDatabase() {
-  if (getSupabaseConfig().enabled) {
-    // Avec Supabase REST, le schéma est exécuté dans l'éditeur SQL de Supabase
-    return;
-  }
-
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
@@ -126,7 +121,7 @@ export async function initDatabase() {
         description TEXT NOT NULL,
         material_details TEXT NOT NULL,
         care_instructions JSONB NOT NULL DEFAULT '[]'::jsonb,
-        dimensions VARCHAR(120) NOT NULL,
+        dimensions TEXT NOT NULL,
         weaving_hours INTEGER NOT NULL DEFAULT 24,
         origin_region VARCHAR(120) NOT NULL DEFAULT 'Antananarivo, Madagascar',
         images JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -143,6 +138,7 @@ export async function initDatabase() {
       ALTER TABLE products ADD COLUMN IF NOT EXISTS handles TEXT;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS interior TEXT;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS production_delay VARCHAR(120);
+      ALTER TABLE products ALTER COLUMN dimensions TYPE TEXT;
 
       CREATE TABLE IF NOT EXISTS shipping_zones (
         id SERIAL PRIMARY KEY,
